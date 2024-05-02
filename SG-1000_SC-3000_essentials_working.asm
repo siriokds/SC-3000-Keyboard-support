@@ -1,7 +1,8 @@
-.define PPI_PortA			$DC
-.define PPI_PortB			$DD
-.define PPI_PortC			$DE
-.define PPI_PortCtrl		$DF
+
+.define PPI_PortA		$DC
+.define PPI_PortB		$DD
+.define PPI_PortC		$DE
+.define PPI_PortCtrl	$DF
 
 .define PSG_Port			$7F
 	
@@ -10,6 +11,10 @@
 .define VDP_PortStatus		$BF
 	
 .define JoystickData		$C002
+.define PauseFlags			$C004
+.define PauseFlag_Disabled	0
+.define PauseFlag_Request	1
+.define PauseCounter		$C005
 	
 .define RAMSTART			$C000
 .define RAMSIZE				$1024
@@ -107,7 +112,35 @@ WRTVDP:
 
 
 
+
+
+	push hl
+	ld 	 hl, PauseFlags
+	set	 PauseFlag_Req, (hl)
+	pop	 hl
+	retn
+
+
 NMI_Handler:
+	push hl
+	push af
+	
+	ld 	 hl,PauseFlags
+	bit  PauseFlag_Disabled, (hl)
+	jr 	 nz, +
+
+	ld 	 a,($c041)
+	rlca
+	jr 	 c, +
+	set  0, (hl)		
+	ld 	 hl,$c043
+	ld 	 a,$04
+	xor  (hl)
+	ld 	 (hl),a
+
++:			
+	pop  af			
+	pop  hl			
 	retn			
 
 
@@ -129,11 +162,23 @@ Interrupt:
 
 	in a, (VDP_PortStatus)
 	
+	ld hl, PauseCounter
+	ld a, (hl)
+	cp $F0
+	jr nc, +
+	inc (hl)		; increment pause counter
++:
+	dec hl			; ld hl, PauseFlags
+	bit 1, (hl)
+	jp 	nz, InterruptGamePaused
+	
+	
 	call PPI_PLAYER_1_READ
 	ld	 (JoystickData), a
 	
 	... interrupt code here ...
 	
+InterruptExit:
 	pop iy
 	pop ix
 	pop hl
@@ -146,9 +191,25 @@ Interrupt:
 	pop de
 	pop bc
 	pop af
-
 	ei
-	ret		; IM 1 doesn't need RETI
+	ret
+
+InterruptGamePaused:
+	ld hl, PSG_INIT_DATA
+	ld c, PSG_Port
+	ld b, $04
+	otir
+
+;	ld a, $9F
+;	out (Port_PSG), a
+;	ld a, $BF
+;	out (Port_PSG), a
+;	ld a, $DF
+;	out (Port_PSG), a
+;	ld a, $FF
+;	out (Port_PSG), a
+
+	jr InterruptExit
 
 
 
