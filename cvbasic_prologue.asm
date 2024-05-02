@@ -276,7 +276,7 @@ keypad_table:
 ;    HL = INPUT DATA ADDRESS
 ;
 ; OUTPUT:
-;    A = joy/key bits (1 = pressed, 0 = not pressed)
+;    A = joy/key bits (0 = pressed, 1 = not pressed)
 ;
 ;--------------------------------------------------------------------
 SG1000_PPI_PLAYER_1_READ:
