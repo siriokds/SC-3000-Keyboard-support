@@ -1,4 +1,11 @@
 
+.define PPI_PortA		$DC
+.define PPI_PortB		$DD
+.define PPI_PortC		$DE
+.define PPI_PortCtrl	$DF
+
+.define PSG_Port		$7F
+
 .org 0
 COLDBOOT:
 	di
@@ -24,13 +31,16 @@ START:
 	call 	PSG_Init
 	call 	CLEAR_RAM
 
-	call 	WAIT_START_1_sec		; used "WAIT_START_1903_ms" on Sega Mark III
+	call 	SYSTEM_INIT_DELAY
 	
 	ld 		a, $92					; PPI Init
-	out 	(_PORT_DF_), a
+	out 	(PPI_PortCtrl), a
 
 
-	...
+	... continue with code ...
+
+
+
 
 
 
@@ -43,14 +53,9 @@ CLEAR_RAM:
 	ldir
 	ret
 
+SYSTEM_INIT_DELAY:
+	ld b, 11			; Mark III has b = 20
 
-WAIT_START_1903_ms:
-	ld b, 20
-	jr WAIT
-
-WAIT_START_1_sec:
-	ld b, 11
-WAIT:
 	ld de, $FFFF
 --:
 	ld hl, $39DE
@@ -66,7 +71,7 @@ WAIT:
 PSG_Init:
 	exx
 	ld hl, PSG_INIT_DATA
-	ld c, Port_PSG
+	ld c, PSG_Port
 	ld b, $04
 	otir
 	xor a
@@ -98,8 +103,8 @@ PSG_INIT_DATA:
 ;--------------------------------------------------------------------
 PPI_PLAYER_1_READ:
 	xor a						; write to PPI PortC and readback
-	out (_PORT_DE_), a
-	in a, (_PORT_DE_)
+	out (PPI_PortCtrl), a
+	in a, (PPI_PortCtrl)
 	or a
 	jr z, +						; Keyboard present
 
@@ -111,14 +116,14 @@ PPI_PLAYER_1_READ:
 ; Keyboard routine
 +:
 	ld a, $07					; Select Row 7
-	out (_PORT_DE_), a
+	out (PPI_PortCtrl), a
 	
 	in a, (PPI_PortA)			; Read Joystick
 	ld c, a
 	
 
 	ld a, $04
-	out (_PORT_DE_), a
+	out (PPI_PortCtrl), a
 	in a, (PPI_PortA)
 	bit 5, a					; Key Cursor Down 	=> Joy Down
 	jp nz, +
@@ -126,7 +131,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $05
-	out (_PORT_DE_), a
+	out (PPI_PortCtrl), a
 	in a, (PPI_PortA)
 	bit 5, a					; Key Cursor Left	=> Joy Left
 	jp nz, +
@@ -134,7 +139,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $06
-	out (_PORT_DE_), a
+	out (PPI_PortCtrl), a
 	in a, (PPI_PortA)
 	bit 5, a					; Key Cursor Right	=> Joy Right
 	jp nz, +
@@ -146,7 +151,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $02
-	out (_PORT_DE_), a
+	out (PPI_PortCtrl), a
 	in a, (PPI_PortA)
 	bit 4, a					; Key Home/Clr		=> Joy Fire 1 (Trig L)
 	jp nz, +
@@ -154,7 +159,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $03
-	out (_PORT_DE_), a
+	out (PPI_PortCtrl), a
 	in a, (PPI_PortA)
 	bit 4, a					; Key Ins/Del		=> Joy Fire 2 (Trig R)
 	jp nz, +
