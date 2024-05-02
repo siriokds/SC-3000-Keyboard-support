@@ -219,7 +219,7 @@ InterruptGamePaused:
 
 
 
-;--------------------------------------------------------------------
+;-----;--------------------------------------------------------------------
 ; SG-1000 / SC-3000  1-player Joystick/Keyboard routines
 ;--------------------------------------------------------------------
 ; SG-1000 with keyboard and SC-3000 returns data from joystick
@@ -252,14 +252,14 @@ PPI_PLAYER_1_READ:
 ; Keyboard routine
 +:
 	ld a, $07					; Select Row 7
-	out (PPI_PortCtrl), a
+	out (PPI_PortC), a
 	
 	in a, (PPI_PortA)			; Read Joystick
 	ld c, a
 	
 
 	ld a, $04
-	out (PPI_PortCtrl), a
+	out (PPI_PortC), a
 	in a, (PPI_PortA)
 	bit 5, a					; Key Cursor Down 	=> Joy Down
 	jp nz, +
@@ -267,7 +267,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $05
-	out (PPI_PortCtrl), a
+	out (PPI_PortC), a
 	in a, (PPI_PortA)
 	bit 5, a					; Key Cursor Left	=> Joy Left
 	jp nz, +
@@ -275,7 +275,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $06
-	out (PPI_PortCtrl), a
+	out (PPI_PortC), a
 	in a, (PPI_PortA)
 	bit 5, a					; Key Cursor Right	=> Joy Right
 	jp nz, +
@@ -287,7 +287,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $02
-	out (PPI_PortCtrl), a
+	out (PPI_PortC), a
 	in a, (PPI_PortA)
 	bit 4, a					; Key Home/Clr		=> Joy Fire 1 (Trig L)
 	jp nz, +
@@ -295,7 +295,7 @@ PPI_PLAYER_1_READ:
 +:
 
 	ld a, $03
-	out (PPI_PortCtrl), a
+	out (PPI_PortC), a
 	in a, (PPI_PortA)
 	bit 4, a					; Key Ins/Del		=> Joy Fire 2 (Trig R)
 	jp nz, +
