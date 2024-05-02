@@ -238,10 +238,11 @@ InterruptGamePaused:
 ;
 ;--------------------------------------------------------------------
 PPI_PLAYER_1_READ:
-	ld a, $AA					; write to PPI PortC and readback
+	ld a, 7						; Select Row 7
 	out (PPI_PortC), a
-	in a, (PPI_PortC)
-	cp $AA
+	
+	in a, (PPI_PortC)			; Readback to detect keyboard
+	cp 7
 	jr z, +						; Keyboard present
 
 
@@ -251,9 +252,6 @@ PPI_PLAYER_1_READ:
 
 ; Keyboard routine
 +:
-	ld a, $07					; Select Row 7
-	out (PPI_PortC), a
-	
 	in a, (PPI_PortA)			; Read Joystick
 	ld c, a
 	
@@ -304,4 +302,5 @@ PPI_PLAYER_1_READ:
 	ld a, c
 	cpl							;  A = DATA (in positive format)
 	ret	
+
 
