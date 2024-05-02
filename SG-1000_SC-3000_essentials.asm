@@ -101,7 +101,7 @@ PPI_PLAYER_1_READ:
 	out (_PORT_DE_), a
 	in a, (_PORT_DE_)
 	or a
-	jr +						; Keyboard present
+	jr z, +						; Keyboard present
 
 
 	in a, (PPI_PortA)			; Read Joystick
