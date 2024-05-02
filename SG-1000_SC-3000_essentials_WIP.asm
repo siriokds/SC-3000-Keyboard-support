@@ -239,8 +239,8 @@ InterruptGamePaused:
 ;--------------------------------------------------------------------
 PPI_PLAYER_1_READ:
 	ld a, $AA					; write to PPI PortC and readback
-	out (PPI_PortCtrl), a
-	in a, (PPI_PortCtrl)
+	out (PPI_PortC), a
+	in a, (PPI_PortC)
 	cp $AA
 	jr z, +						; Keyboard present
 
