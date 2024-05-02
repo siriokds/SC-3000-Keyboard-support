@@ -45,8 +45,11 @@ START:
 
 	; 3) Screen off
 	ld		bc, $8001
-	call	WRTVDP
-	
+	ld  	a, $80
+	out 	(VDP_PortCommand),a
+	ld 		a, $81
+	out 	(VDP_PortCommand),a
+
 	; 4) CLEAR_RAM
 	ld 	hl, RAMSTART
 	ld 	de, RAMSTART + 1
@@ -104,6 +107,74 @@ WRTVDP:
 	or $80
 	out (VDP_PortCommand),a
 	ret
+
+
+SETWRT:
+	ld a,l
+	out (VDP_PortCommand1),a
+	ld a,h
+	or $40
+	out (VDP_PortCommand),a
+	ret
+
+SETRD:
+	ld a,l
+	out (VDP_PortCommand),a
+	ld a,h
+	and $3f
+	out (VDP_PortCommand),a
+	ret
+
+WRTVRM:
+	push af
+	call SETWRT
+	pop af
+	out (VDP_PortData),a
+	ret
+
+RDVRM:
+	push af
+	call SETRD
+	pop af
+	ex (sp),hl
+	ex (sp),hl
+	in a,(VDP_PortData)
+	ret
+	
+FILVRM:
+	push af
+	call SETWRT
+-:	
+	pop af
+	out (VDP_PortData),a
+	push af
+	dec bc
+	ld a,b
+	or c
+	jp nz,-
+	
+	pop af
+	ret	
+
+
+LDIRVM:
+	EX DE,HL
+	CALL SETWRT
+	EX DE,HL
+	DEC BC
+	INC C
+	LD A,B
+	LD B,C
+	INC A
+	LD C,VDP
+.1:
+	NOP
+	OUTI
+	JP NZ,.1
+	DEC A
+	JP NZ,.1
+	RET
+
 
 
 
